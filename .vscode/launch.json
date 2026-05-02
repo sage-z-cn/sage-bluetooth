@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "调试应用",
+            "name": "Debug Application",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/src/main.py",

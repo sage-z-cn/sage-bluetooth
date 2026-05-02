@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "运行应用",
+            "label": "Run Application",
             "type": "shell",
             "command": "python",
             "args": ["-m", "src.main"],
@@ -59,7 +59,7 @@
             "problemMatcher": []
         },
         {
-            "label": "安装开发依赖",
+            "label": "Install Dev Dependencies",
             "type": "shell",
             "command": "pip",
             "args": ["install", "-r", "requirements-dev.txt"],
