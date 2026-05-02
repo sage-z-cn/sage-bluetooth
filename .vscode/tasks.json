@@ -23,7 +23,7 @@
             "problemMatcher": []
         },
         {
-            "label": "运行测试",
+            "label": "Run Tests",
             "type": "shell",
             "command": "python",
             "args": ["-m", "pytest", "tests/", "-v"],
@@ -35,7 +35,7 @@
             "problemMatcher": []
         },
         {
-            "label": "PyInstaller 构建",
+            "label": "PyInstaller Build",
             "type": "shell",
             "command": "python",
             "args": ["build.py"],
@@ -47,7 +47,7 @@
             "problemMatcher": []
         },
         {
-            "label": "安装依赖",
+            "label": "Install Dependencies",
             "type": "shell",
             "command": "pip",
             "args": ["install", "-r", "requirements.txt"],
