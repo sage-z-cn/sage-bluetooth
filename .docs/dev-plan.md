@@ -16,7 +16,7 @@
 | # | 任务 | 产出 | 优先级 |
 |---|------|------|--------|
 | 0.1 | 按设计文档的目录结构创建项目骨架（所有目录和 `__init__.py`） | 完整目录结构 | P0 |
-| 0.2 | 创建 `requirements.txt`（PyQt5>=5.15, bleak>=0.22, qasync>=0.27） | 依赖文件 | P0 |
+| 0.2 | 创建 `requirements.txt`（PyQt5>=5.15, bleak>=3.0.1, qasync>=0.27） | 依赖文件 | P0 |
 | 0.3 | 创建 `requirements-dev.txt`（pytest, pytest-qt, pytest-asyncio, pyinstaller） | 开发依赖 | P0 |
 | 0.4 | 初始化 git 仓库，添加 `.gitignore` | 版本控制 | P0 |
 | 0.5 | 创建 `src/config.py`，定义全局常量（窗口尺寸、扫描超时、路径等） | 全局配置 | P0 |

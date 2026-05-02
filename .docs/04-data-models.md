@@ -52,7 +52,7 @@ class BLEDeviceModel:
         return cls(
             address=device.address,
             name=device.name or advertisement_data.local_name or "Unknown",
-            rssi=device.rssi or -100,
+            rssi=advertisement_data.rssi or -100,
             appearance=advertisement_data.appearance or 0,
             manufacturer_data=dict(advertisement_data.manufacturer_data),
             service_uuids=list(advertisement_data.service_uuids),

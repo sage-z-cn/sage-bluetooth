@@ -6,7 +6,7 @@
 
 ```
 PyQt5>=5.15.0
-bleak>=0.22.0
+bleak>=3.0.1
 qasync>=0.27.0
 ```
 
@@ -44,7 +44,8 @@ PyInstaller.__main__.run([
     "--icon=resources/icons/app.ico",       # 应用图标
     "--add-data=resources;resources",       # 打包资源文件
     "--hidden-import=qasync",               # 隐藏导入
-    "--hidden-import=bleak.backends.winrt", # Windows 后端
+    "--hidden-import=bleak.backends.winrt",
+    "--hidden-import=bleak.args",
     "--clean",                              # 清理临时文件
     "--noconfirm",                          # 不确认覆盖
 ])

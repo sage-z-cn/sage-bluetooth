@@ -227,7 +227,7 @@ def detection_callback(device, advertisement_data):
     address = device.address
     if address in _discovered_devices:
         # 更新 RSSI 和广播数据
-        _discovered_devices[address].rssi = device.rssi
+        _discovered_devices[address].rssi = advertisement_data.rssi or -100
         _discovered_devices[address].merge_advertisement(advertisement_data)
     else:
         # 新设备
@@ -298,7 +298,7 @@ class DeviceConnector(QObject):
 
 ### 6.4 连接超时处理
 
-Bleak 默认连接超时约 10 秒。建议在 UI 层显示连接进度，超时后给出友好提示。
+Bleak 默认连接超时为 30 秒（bleak>=2.1.1）。建议在 UI 层显示连接进度，超时后给出友好提示。
 
 ---
 
@@ -402,10 +402,11 @@ class GattReader:
 
 | 错误场景 | 异常类型 | UI 提示 |
 |---------|---------|---------|
-| 蓝牙未开启 | `BleakBluetoothNotAvailableError` | "请开启系统蓝牙后重试" |
+| 蓝牙未开启/不可用 | `BleakBluetoothNotAvailableError` | "请开启系统蓝牙后重试" |
 | 设备未找到 | `BleakDeviceNotFoundError` | "未找到指定设备，请确认设备在附近且可发现" |
 | 连接被拒绝 | `BleakError` (权限相关) | "连接被拒绝，请尝试先配对设备" |
 | 连接超时 | `asyncio.TimeoutError` | "连接超时，请检查设备是否可连接" |
+| GATT 协议错误 | `BleakGATTProtocolError` | "GATT 操作失败，设备可能不支持此功能" |
 | 特征未找到 | `BleakCharacteristicNotFoundError` | "设备不支持此功能" |
 | 配对失败 | `BleakError` | "配对失败，请确认配对码或重试" |
 | 无管理员权限 | `subprocess.CalledProcessError` | "操作需要管理员权限" |
