@@ -5,7 +5,12 @@
             "label": "运行应用",
             "type": "shell",
             "command": "python",
-            "args": ["src/main.py"],
+            "args": ["-m", "src.main"],
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}"
+                }
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true
