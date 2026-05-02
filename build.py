@@ -32,6 +32,7 @@ def build():
         f"--name={APP_NAME}",
         "--windowed",
         "--onefile",
+        "--uac-admin",
         f"--icon={ICON_PATH}",
         f"--add-data=resources;resources",
         "--hidden-import=qasync",
