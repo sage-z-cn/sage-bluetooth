@@ -436,7 +436,7 @@ async def connect_with_retry(self, address: str, max_retries: int = 3):
 
 ```python
 import sys
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 import qasync
 import asyncio
 

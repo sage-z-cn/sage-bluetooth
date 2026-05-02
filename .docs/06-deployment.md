@@ -5,9 +5,9 @@
 ### 1.1 requirements.txt
 
 ```
-PyQt5>=5.15.0
+PyQt6>=6.5.0
 bleak>=3.0.1
-qasync>=0.27.0
+qasync>=0.28.0
 ```
 
 ### 1.2 开发依赖
@@ -200,7 +200,7 @@ os.environ["BLEAK_LOGGING"] = "1"
 │   ├── icons/
 │   └── styles/
 ├── python310.dll
-├── PyQt5/
+├── PyQt6/
 ├── bleak/
 └── ...
 ```
