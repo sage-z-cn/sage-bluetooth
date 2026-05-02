@@ -1,0 +1,63 @@
+BLE_UUID_BASE = "-0000-1000-8000-00805f9b34fb"
+
+SERVICE_GAP = f"00001800{BLE_UUID_BASE}"
+SERVICE_DIS = f"0000180a{BLE_UUID_BASE}"
+SERVICE_BAS = f"0000180f{BLE_UUID_BASE}"
+SERVICE_HID = f"00001812{BLE_UUID_BASE}"
+SERVICE_HEART_RATE = f"0000180d{BLE_UUID_BASE}"
+SERVICE_BLOOD_PRESSURE = f"00001810{BLE_UUID_BASE}"
+SERVICE_GLUCOSE = f"00001808{BLE_UUID_BASE}"
+SERVICE_HEALTH_THERMOMETER = f"00001809{BLE_UUID_BASE}"
+SERVICE_RUNNING_SPEED = f"00001814{BLE_UUID_BASE}"
+SERVICE_CYCLING_SPEED = f"00001816{BLE_UUID_BASE}"
+
+CHAR_DEVICE_NAME = f"00002a00{BLE_UUID_BASE}"
+CHAR_APPEARANCE = f"00002a01{BLE_UUID_BASE}"
+CHAR_MANUFACTURER_NAME = f"00002a29{BLE_UUID_BASE}"
+CHAR_MODEL_NUMBER = f"00002a24{BLE_UUID_BASE}"
+CHAR_SERIAL_NUMBER = f"00002a25{BLE_UUID_BASE}"
+CHAR_HARDWARE_REVISION = f"00002a27{BLE_UUID_BASE}"
+CHAR_FIRMWARE_REVISION = f"00002a26{BLE_UUID_BASE}"
+CHAR_SOFTWARE_REVISION = f"00002a28{BLE_UUID_BASE}"
+CHAR_BATTERY_LEVEL = f"00002a19{BLE_UUID_BASE}"
+
+SERVICE_UUID_NAMES = {
+    SERVICE_GAP: "Generic Access",
+    SERVICE_DIS: "Device Information",
+    SERVICE_BAS: "Battery Service",
+    SERVICE_HID: "Human Interface Device",
+    SERVICE_HEART_RATE: "Heart Rate",
+    SERVICE_BLOOD_PRESSURE: "Blood Pressure",
+    SERVICE_GLUCOSE: "Glucose",
+    SERVICE_HEALTH_THERMOMETER: "Health Thermometer",
+    SERVICE_RUNNING_SPEED: "Running Speed and Cadence",
+    SERVICE_CYCLING_SPEED: "Cycling Speed and Cadence",
+    f"00001801{BLE_UUID_BASE}": "Generic Attribute",
+    f"00001802{BLE_UUID_BASE}": "Immediate Alert",
+    f"00001803{BLE_UUID_BASE}": "Link Loss",
+    f"00001804{BLE_UUID_BASE}": "Tx Power",
+    f"00001805{BLE_UUID_BASE}": "Current Time",
+    f"00001806{BLE_UUID_BASE}": "Reference Time Update",
+    f"00001807{BLE_UUID_BASE}": "Next DST Change",
+    f"00001811{BLE_UUID_BASE}": "Alert Notification",
+    f"00001813{BLE_UUID_BASE}": "Scan Parameters",
+    f"00001815{BLE_UUID_BASE}": "Automation IO",
+    f"00001817{BLE_UUID_BASE}": "Cycling Power",
+    f"00001818{BLE_UUID_BASE}": "Location and Navigation",
+    f"00001819{BLE_UUID_BASE}": "Environmental Sensing",
+    f"0000181a{BLE_UUID_BASE}": "Body Composition",
+    f"0000181b{BLE_UUID_BASE}": "User Data",
+    f"0000181c{BLE_UUID_BASE}": "Weight Scale",
+    f"0000181d{BLE_UUID_BASE}": "Bond Management",
+    f"0000181e{BLE_UUID_BASE}": "Continuous Glucose Monitor",
+    f"0000181f{BLE_UUID_BASE}": "Internet Protocol Support",
+    f"00001820{BLE_UUID_BASE}": "Indoor Positioning",
+    f"00001821{BLE_UUID_BASE}": "Pulse Oximeter",
+    f"00001822{BLE_UUID_BASE}": "HTTP Proxy",
+    f"00001823{BLE_UUID_BASE}": "Transport Discovery",
+    f"00001824{BLE_UUID_BASE}": "Object Transfer",
+}
+
+
+def resolve_service_name(uuid: str) -> str:
+    return SERVICE_UUID_NAMES.get(uuid.lower(), "Unknown Service")
