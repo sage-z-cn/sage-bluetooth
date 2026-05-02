@@ -198,13 +198,55 @@ body {
     height: 52px;
     padding: 8px 12px;
     display: flex;
+    align-items: center;
     gap: 8px;
     flex-shrink: 0;
     border-bottom: 1px solid var(--divider);
 }
-.ctrl-btn {
+.bt-switch-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
     flex: 1;
+}
+.bt-switch-group.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+.bt-switch {
+    width: 44px;
+    height: 24px;
+    background: #BDBDBD;
+    border-radius: 12px;
+    padding: 2px;
+    transition: background 0.25s ease;
+    flex-shrink: 0;
+}
+.bt-switch.on {
+    background: var(--success);
+}
+.bt-switch-handle {
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: transform 0.25s ease;
+}
+.bt-switch.on .bt-switch-handle {
+    transform: translateX(20px);
+}
+.bt-switch-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+.ctrl-btn {
     height: 36px;
+    min-width: 90px;
     border: none;
     border-radius: var(--border-radius);
     font-size: 13px;
@@ -379,21 +421,20 @@ body {
 
 /* ===== 设备详情面板 ===== */
 .device-detail {
-    height: 200px;
+    height: 0;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+    transition: height 0.25s ease-out;
 }
-.detail-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--text-secondary);
+.device-detail.expanded {
+    height: 260px;
 }
-.detail-empty .empty-icon { font-size: 32px; margin-bottom: 8px; opacity: 0.5; }
-.detail-empty .empty-text { font-size: 13px; }
+.device-detail.collapsing {
+    height: 0;
+    transition: height 0.2s ease-in;
+}
 
 .detail-header {
     padding: 8px 12px 6px;
@@ -548,6 +589,142 @@ body {
     cursor: not-allowed;
 }
 
+/* ===== 设备条目内操作按钮 ===== */
+.device-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+.device-action-btn {
+    min-width: 48px;
+    max-width: 56px;
+    height: 22px;
+    font-size: 10px;
+    font-weight: 500;
+    border-radius: 3px;
+    padding: 1px 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+.device-action-btn.primary-action {
+    background: var(--primary);
+    color: white;
+    border: none;
+}
+.device-action-btn.primary-action:hover { background: var(--primary-hover); }
+.device-action-btn.disconnect {
+    background: var(--error);
+    color: white;
+    border: none;
+}
+.device-action-btn.disconnect:hover { background: #D32F2F; }
+.device-action-btn.delete {
+    background: transparent;
+    color: #9E9E9E;
+    border: 1px solid #E0E0E0;
+}
+.device-action-btn.delete:hover {
+    color: var(--error);
+    border-color: var(--error);
+}
+.device-action-btn.action-disabled {
+    background: var(--disabled-bg);
+    color: var(--disabled-text);
+    border-color: var(--disabled-bg);
+    cursor: not-allowed;
+}
+
+/* ===== 删除确认对话框 ===== */
+.modal-overlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+.modal-overlay.visible {
+    display: flex;
+}
+.delete-dialog {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+    width: 280px;
+    overflow: hidden;
+    animation: dialogIn 0.2s ease;
+}
+@keyframes dialogIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+.dialog-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 16px 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.dialog-header .dialog-icon {
+    font-size: 18px;
+}
+.dialog-body {
+    padding: 0 16px 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+.dialog-body .device-highlight {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+.dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 10px 16px;
+    border-top: 1px solid var(--divider);
+    background: #FAFAFA;
+}
+.dialog-btn {
+    height: 30px;
+    padding: 0 14px;
+    border-radius: var(--border-radius);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+.dialog-btn.cancel {
+    background: white;
+    color: var(--text-primary);
+    border: 1px solid var(--divider);
+}
+.dialog-btn.cancel:hover { border-color: #BDBDBD; }
+.dialog-btn.confirm-delete {
+    background: var(--error);
+    color: white;
+    border: none;
+}
+.dialog-btn.confirm-delete:hover { background: #D32F2F; }
+
 /* ===== 托盘菜单 ===== */
 .tray-section {
     display: flex;
@@ -692,10 +869,6 @@ body {
                     <span class="menu-icon">🔄</span> 刷新设备列表
                 </div>
                 <div class="tray-menu-separator"></div>
-                <div class="tray-menu-item disabled" id="trayDisconnect">
-                    <span class="menu-icon">✕</span> 断开当前连接
-                </div>
-                <div class="tray-menu-separator"></div>
                 <div class="tray-menu-item" style="color:#E53935"><span class="menu-icon">🚪</span> 退出</div>
             </div>
         </div>
@@ -722,15 +895,14 @@ body {
 
             <!-- 控制面板 -->
             <div class="control-panel" id="controlPanel">
-                <button class="ctrl-btn" id="btnBluetooth" onclick="toggleBluetooth()">
-                    <span id="btnBtIcon">🔵</span>
-                    <span id="btnBtText">关闭蓝牙</span>
-                </button>
+                <div class="bt-switch-group" id="btSwitchGroup" onclick="toggleBluetooth()">
+                    <div class="bt-switch" id="btSwitch">
+                        <div class="bt-switch-handle" id="btSwitchHandle"></div>
+                    </div>
+                    <span class="bt-switch-label" id="btSwitchLabel">蓝牙 ON</span>
+                </div>
                 <button class="ctrl-btn" id="btnRefresh" onclick="setState('scanning')">
                     <span>🔄</span> <span>刷新</span>
-                </button>
-                <button class="ctrl-btn disabled" id="btnDisconnect" onclick="doDisconnect()">
-                    <span>✕</span> <span>断开</span>
                 </button>
             </div>
 
@@ -750,6 +922,24 @@ body {
             <div class="device-detail" id="deviceDetail">
                 <!-- 由 JS 动态渲染 -->
             </div>
+
+            <!-- 删除确认对话框遮罩层 -->
+            <div class="modal-overlay" id="deleteModal">
+                <div class="delete-dialog">
+                    <div class="dialog-header">
+                        <span class="dialog-icon">⚠️</span>
+                        <span>确认删除</span>
+                    </div>
+                    <div class="dialog-body">
+                        确定要删除设备 <span class="device-highlight" id="deleteDeviceName">""</span> 的配对记录吗？<br>
+                        删除后需重新配对才能连接。
+                    </div>
+                    <div class="dialog-footer">
+                        <button class="dialog-btn cancel" onclick="cancelDelete()">取消</button>
+                        <button class="dialog-btn confirm-delete" onclick="confirmDelete()">确定删除</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -761,11 +951,11 @@ body {
                 <div class="tray-menu-header" id="statusTitle">蓝牙开启 · 空闲</div>
                 <div class="tray-menu-separator"></div>
                 <div class="tray-menu-item" style="cursor:default"><span class="menu-icon">💡</span> 托盘图标: <span id="trayIconDesc" class="badge info">蓝色</span></div>
-                <div class="tray-menu-item" style="cursor:default"><span class="menu-icon">🔘</span> 蓝牙按钮: <span id="btBtnDesc" class="badge on">关闭蓝牙</span></div>
+                <div class="tray-menu-item" style="cursor:default"><span class="menu-icon">🔘</span> 蓝牙开关: <span id="btBtnDesc" class="badge on">ON (启用)</span></div>
                 <div class="tray-menu-item" style="cursor:default"><span class="menu-icon">🔄</span> 刷新按钮: <span id="refreshDesc" class="badge on">启用</span></div>
-                <div class="tray-menu-item" style="cursor:default"><span class="menu-icon">✕</span> 断开按钮: <span id="disconnectDesc" class="badge gray">禁用</span></div>
                 <div class="tray-menu-separator"></div>
                 <div class="tray-menu-item" style="cursor:default"><span class="menu-icon">📋</span> 设备列表: <span id="listDesc" class="badge info">上次结果</span></div>
+                <div class="tray-menu-item" style="cursor:default"><span class="menu-icon">🔘</span> 条目操作: <span id="actionsDesc" class="badge gray">按状态</span></div>
                 <div class="tray-menu-item" style="cursor:default"><span class="menu-icon">📄</span> 详情面板: <span id="detailDesc" class="badge gray">未选择</span></div>
             </div>
         </div>
@@ -780,10 +970,10 @@ body {
             <tr>
                 <th>状态</th>
                 <th>托盘图标</th>
-                <th>蓝牙按钮</th>
+                <th>蓝牙开关</th>
                 <th>刷新按钮</th>
-                <th>断开按钮</th>
                 <th>设备列表</th>
+                <th>条目操作</th>
                 <th>详情面板</th>
             </tr>
         </thead>
@@ -791,65 +981,74 @@ body {
             <tr>
                 <td><strong>蓝牙关闭</strong></td>
                 <td><span class="badge off">灰色</span></td>
-                <td><span class="badge on">开启蓝牙</span></td>
-                <td><span class="badge gray">禁用</span></td>
+                <td><span class="badge gray">OFF (启用)</span></td>
                 <td><span class="badge gray">禁用</span></td>
                 <td><span class="badge gray">空状态</span></td>
-                <td><span class="badge warn">提示开启</span></td>
+                <td><span class="badge gray">无</span></td>
+                <td><span class="badge gray">隐藏</span></td>
             </tr>
             <tr>
                 <td><strong>开启·空闲</strong></td>
                 <td><span class="badge info">蓝色</span></td>
-                <td><span class="badge on">关闭蓝牙</span></td>
+                <td><span class="badge on">ON (启用)</span></td>
                 <td><span class="badge on">启用</span></td>
-                <td><span class="badge gray">禁用</span></td>
                 <td><span class="badge info">上次/空</span></td>
-                <td><span class="badge gray">未选择</span></td>
+                <td><span class="badge on">按状态</span></td>
+                <td><span class="badge gray">隐藏</span></td>
             </tr>
             <tr>
                 <td><strong>扫描中</strong></td>
                 <td><span class="badge warn">旋转</span></td>
-                <td><span class="badge on">关闭蓝牙</span></td>
+                <td><span class="badge warn">ON (禁用)</span></td>
                 <td><span class="badge warn">加载中</span></td>
-                <td><span class="badge gray">禁用</span></td>
                 <td><span class="badge warn">实时更新</span></td>
-                <td><span class="badge gray">未选择</span></td>
+                <td><span class="badge gray">禁用</span></td>
+                <td><span class="badge gray">隐藏(收起)</span></td>
             </tr>
             <tr>
                 <td><strong>已选择</strong></td>
                 <td><span class="badge info">蓝色</span></td>
-                <td><span class="badge on">关闭蓝牙</span></td>
+                <td><span class="badge on">ON (启用)</span></td>
                 <td><span class="badge on">启用</span></td>
-                <td><span class="badge gray">禁用</span></td>
                 <td><span class="badge info">选中高亮</span></td>
-                <td><span class="badge on">详情+连接</span></td>
+                <td><span class="badge on">按状态</span></td>
+                <td><span class="badge on">展开详情</span></td>
             </tr>
             <tr>
                 <td><strong>连接中</strong></td>
                 <td><span class="badge warn">黄色</span></td>
-                <td><span class="badge on">关闭蓝牙</span></td>
-                <td><span class="badge gray">禁用</span></td>
+                <td><span class="badge warn">ON (禁用)</span></td>
                 <td><span class="badge gray">禁用</span></td>
                 <td><span class="badge gray">禁用</span></td>
                 <td><span class="badge warn">连接中...</span></td>
+                <td><span class="badge warn">展开详情</span></td>
             </tr>
             <tr>
                 <td><strong>已连接</strong></td>
                 <td><span class="badge on">绿色</span></td>
-                <td><span class="badge on">关闭蓝牙</span></td>
-                <td><span class="badge on">启用</span></td>
+                <td><span class="badge on">ON (启用)</span></td>
                 <td><span class="badge on">启用</span></td>
                 <td><span class="badge info">选中高亮</span></td>
-                <td><span class="badge on">详情+断开</span></td>
+                <td><span class="badge on">[断开][删除]</span></td>
+                <td><span class="badge on">展开详情</span></td>
             </tr>
             <tr>
                 <td><strong>断开中</strong></td>
                 <td><span class="badge warn">黄色</span></td>
-                <td><span class="badge on">关闭蓝牙</span></td>
-                <td><span class="badge gray">禁用</span></td>
+                <td><span class="badge warn">ON (禁用)</span></td>
                 <td><span class="badge gray">禁用</span></td>
                 <td><span class="badge gray">禁用</span></td>
                 <td><span class="badge warn">断开中...</span></td>
+                <td><span class="badge warn">展开详情</span></td>
+            </tr>
+            <tr>
+                <td><strong>删除确认</strong></td>
+                <td><span class="badge info">不变</span></td>
+                <td><span class="badge warn">ON (禁用)</span></td>
+                <td><span class="badge gray">禁用</span></td>
+                <td><span class="badge gray">禁用</span></td>
+                <td><span class="badge gray">禁用</span></td>
+                <td><span class="badge gray">展开详情</span></td>
             </tr>
         </tbody>
     </table>
@@ -857,17 +1056,20 @@ body {
 
 <script>
 const DEVICES = [
-    { name: "AirPods Pro", address: "A4:83:E7:2B:5F:C1", type: "耳机", icon: "🎧", battery: 80, rssi: -45, manufacturer: "Apple Inc.", model: "AirPods Pro", firmware: "5B58", serial: "FNK4Z---", appearance: 0x0084 },
-    { name: "MX Master 3", address: "D3:57:22:8A:E1:4B", type: "鼠标", icon: "🖱️", battery: 65, rssi: -58, manufacturer: "Logitech", model: "MX Master 3S", firmware: "v1.40", serial: "2B1A3C", appearance: 0x00C2 },
-    { name: "Keychron K3", address: "7F:91:D4:A3:C8:E6", type: "键盘", icon: "⌨️", battery: 42, rssi: -72, manufacturer: "Keychron", model: "K3 Pro", firmware: "v2.10", serial: "KC-3P-22", appearance: 0x00C1 },
-    { name: "Galaxy Buds2", address: "B2:C5:19:F3:D7:A8", type: "耳机", icon: "🎧", battery: 15, rssi: -85, manufacturer: "Samsung", model: "Galaxy Buds2 Pro", firmware: "R510XXU0AU", serial: "--", appearance: 0x0080 },
-    { name: "JBL Flip 6", address: "E8:3A:CC:71:B9:D2", type: "音箱", icon: "🔊", battery: null, rssi: -63, manufacturer: "JBL", model: "Flip 6", firmware: "0.4.7", serial: "--", appearance: 0x0104 },
+    { name: "AirPods Pro", address: "A4:83:E7:2B:5F:C1", type: "耳机", icon: "🎧", battery: 80, rssi: -45, manufacturer: "Apple Inc.", model: "AirPods Pro", firmware: "5B58", serial: "FNK4Z---", appearance: 0x0084, paired: true },
+    { name: "MX Master 3", address: "D3:57:22:8A:E1:4B", type: "鼠标", icon: "🖱️", battery: 65, rssi: -58, manufacturer: "Logitech", model: "MX Master 3S", firmware: "v1.40", serial: "2B1A3C", appearance: 0x00C2, paired: true },
+    { name: "Keychron K3", address: "7F:91:D4:A3:C8:E6", type: "键盘", icon: "⌨️", battery: 42, rssi: -72, manufacturer: "Keychron", model: "K3 Pro", firmware: "v2.10", serial: "KC-3P-22", appearance: 0x00C1, paired: true },
+    { name: "Galaxy Buds2", address: "B2:C5:19:F3:D7:A8", type: "耳机", icon: "🎧", battery: 15, rssi: -85, manufacturer: "Samsung", model: "Galaxy Buds2 Pro", firmware: "R510XXU0AU", serial: "--", appearance: 0x0080, paired: false },
+    { name: "JBL Flip 6", address: "E8:3A:CC:71:B9:D2", type: "音箱", icon: "🔊", battery: null, rssi: -63, manufacturer: "JBL", model: "Flip 6", firmware: "0.4.7", serial: "--", appearance: 0x0104, paired: false },
 ];
 
 let currentState = 'bt_on_idle';
+let previousState = 'bt_on_idle';
 let selectedDevice = null;
 let scanCount = 0;
 let scanTimer = null;
+let deleteTargetDevice = null;
+let deletedDevices = new Set();
 
 function rssiToBars(rssi) {
     if (rssi >= -50) return 10;
@@ -894,7 +1096,8 @@ function batteryColor(level) {
 
 function renderDeviceList(devices, interactive) {
     const list = document.getElementById('deviceList');
-    if (!devices || devices.length === 0) {
+    const visibleDevices = devices.filter(d => !deletedDevices.has(d.address));
+    if (!visibleDevices || visibleDevices.length === 0) {
         list.innerHTML = `
             <div class="list-empty">
                 <div class="empty-icon">📡</div>
@@ -903,18 +1106,53 @@ function renderDeviceList(devices, interactive) {
             </div>`;
         return;
     }
-    list.innerHTML = devices.map((d, i) => `
+    list.innerHTML = visibleDevices.map((d, vi) => {
+        const i = devices.indexOf(d);
+        const isConnected = currentState === 'connected' && selectedDevice === i;
+        const isConnecting = currentState === 'connecting' && selectedDevice === i;
+        const isDisconnecting = currentState === 'disconnecting' && selectedDevice === i;
+
+        let actionsHtml = '';
+        if (currentState === 'delete_confirm') {
+            if (selectedDevice === i) {
+                actionsHtml = `<button class="device-action-btn action-disabled">操作中...</button>`;
+            } else {
+                actionsHtml = `<button class="device-action-btn action-disabled">--</button>`;
+            }
+        } else if (isConnecting || isDisconnecting) {
+            if (selectedDevice === i) {
+                const label = isConnecting ? '连接中...' : '断开中...';
+                actionsHtml = `<button class="device-action-btn action-disabled">${label}</button>
+                    <button class="device-action-btn delete" onclick="event.stopPropagation(); requestDelete(${i})">🗑 删除</button>`;
+            } else {
+                const actionLabel = d.paired ? '连接' : '配对';
+                actionsHtml = `
+                    <button class="device-action-btn primary-action" onclick="event.stopPropagation(); doPrimaryAction(${i})">${actionLabel}</button>
+                    <button class="device-action-btn delete" onclick="event.stopPropagation(); requestDelete(${i})">🗑 删除</button>`;
+            }
+        } else if (isConnected) {
+            actionsHtml = `
+                <button class="device-action-btn disconnect" onclick="event.stopPropagation(); doDisconnect()">断开</button>
+                <button class="device-action-btn delete" onclick="event.stopPropagation(); requestDelete(${i})">🗑 删除</button>`;
+        } else {
+            const actionLabel = d.paired ? '连接' : '配对';
+            actionsHtml = `
+                <button class="device-action-btn primary-action" onclick="event.stopPropagation(); doPrimaryAction(${i})">${actionLabel}</button>
+                <button class="device-action-btn delete" onclick="event.stopPropagation(); requestDelete(${i})">🗑 删除</button>`;
+        }
+
+        return `
         <div class="device-item ${selectedDevice === i ? 'selected' : ''}"
              ${interactive ? `onclick="selectDevice(${i})"` : ''}>
             <div class="device-icon">${d.icon}</div>
             <div class="device-info">
-                <div class="device-name">${d.name}</div>
+                <div class="device-name">${d.name}${isConnected ? ' <span style="color:#4CAF50;font-size:11px">✅已连接</span>' : ''}</div>
                 <div class="device-meta">
                     <span>${d.type}</span>
                     <span>${d.address}</span>
                 </div>
             </div>
-            <div style="text-align:right">
+            <div style="text-align:right; flex-shrink:0">
                 ${d.battery !== null ? `<div class="device-battery ${batteryClass(d.battery)}">🔋 ${d.battery}%</div>` : ''}
                 <div class="device-rssi">
                     <span class="signal-bars">
@@ -926,16 +1164,27 @@ function renderDeviceList(devices, interactive) {
                     ${d.rssi} dBm
                 </div>
             </div>
-        </div>
-    `).join('');
+            <div class="device-actions">
+                ${actionsHtml}
+            </div>
+        </div>`;
+    }).join('');
 }
 
-function renderDetailEmpty(msg, icon) {
-    document.getElementById('deviceDetail').innerHTML = `
-        <div class="detail-empty">
-            <div class="empty-icon">${icon || '📱'}</div>
-            <div class="empty-text">${msg || '请从列表中选择一个设备'}</div>
-        </div>`;
+function showDetailPanel() {
+    const panel = document.getElementById('deviceDetail');
+    panel.classList.remove('collapsing');
+    panel.classList.add('expanded');
+}
+
+function hideDetailPanel() {
+    const panel = document.getElementById('deviceDetail');
+    panel.classList.remove('expanded');
+    panel.classList.add('collapsing');
+    setTimeout(() => {
+        panel.classList.remove('collapsing');
+        panel.innerHTML = '';
+    }, 200);
 }
 
 function renderDetail(device, state) {
@@ -962,25 +1211,6 @@ function renderDetail(device, state) {
         return `<span class="rssi-bar ${i < rssiBars ? 'active' : ''}" style="height:${h}px"></span>`;
     }).join('');
 
-    let actionsHtml = '';
-    if (isConnecting || isDisconnecting) {
-        actionsHtml = `
-            <div class="detail-actions">
-                <button class="detail-btn disabled" style="flex:1">${isConnecting ? '连接中...' : '断开中...'}</button>
-            </div>`;
-    } else if (isConnected) {
-        actionsHtml = `
-            <div class="detail-actions">
-                <button class="detail-btn danger" onclick="setState('disconnecting')">断开连接</button>
-            </div>`;
-    } else {
-        actionsHtml = `
-            <div class="detail-actions">
-                <button class="detail-btn primary" onclick="setState('connecting')">连接</button>
-                <button class="detail-btn">配对</button>
-            </div>`;
-    }
-
     document.getElementById('deviceDetail').innerHTML = `
         <div class="detail-header">设备信息</div>
         <div class="detail-content">
@@ -994,8 +1224,7 @@ function renderDetail(device, state) {
             <div class="detail-row"><span class="detail-label">电量:</span><span class="detail-value">${batteryHtml}</span></div>
             <div class="detail-row"><span class="detail-label">信号强度:</span><span class="detail-value"><span class="rssi-bar-container"><span class="rssi-bars">${rssiBarHtml}</span>${device.rssi} dBm</span></span></div>
             <div class="detail-row"><span class="detail-label">连接状态:</span><span class="detail-value">${statusBadge}</span></div>
-        </div>
-        ${actionsHtml}`;
+        </div>`;
 }
 
 function setIndicator(cls) {
@@ -1003,12 +1232,18 @@ function setIndicator(cls) {
     el.className = 'bluetooth-indicator ' + cls;
 }
 
+function setBtSwitch(on, enabled) {
+    const sw = document.getElementById('btSwitch');
+    const group = document.getElementById('btSwitchGroup');
+    const label = document.getElementById('btSwitchLabel');
+    sw.className = 'bt-switch' + (on ? ' on' : '');
+    group.className = 'bt-switch-group' + (enabled ? '' : ' disabled');
+    label.textContent = on ? '蓝牙 ON' : '蓝牙 OFF';
+}
+
 function setButton(id, enabled, text, extraClass) {
     const btn = document.getElementById(id);
     btn.className = 'ctrl-btn' + (enabled ? '' : ' disabled') + (extraClass ? ' ' + extraClass : '');
-    if (id === 'btnBluetooth') {
-        document.getElementById('btnBtText').textContent = text;
-    }
 }
 
 function updateStatusPanel(state) {
@@ -1019,45 +1254,37 @@ function updateStatusPanel(state) {
         selected: '已选择设备',
         connecting: '连接中...',
         connected: '已连接',
-        disconnecting: '断开中...'
+        disconnecting: '断开中...',
+        delete_confirm: '确认删除...'
     };
     document.getElementById('statusTitle').textContent = titles[state] || state;
 
     const configs = {
-        bt_off:       { tray: ['灰色','off'], btBtn: ['开启蓝牙','on'], refresh: ['禁用','gray'], disconnect: ['禁用','gray'], list: ['空状态','gray'], detail: ['提示开启','warn'] },
-        bt_on_idle:   { tray: ['蓝色','info'], btBtn: ['关闭蓝牙','on'], refresh: ['启用','on'], disconnect: ['禁用','gray'], list: ['上次/空','info'], detail: ['未选择','gray'] },
-        scanning:     { tray: ['旋转','warn'], btBtn: ['关闭蓝牙','on'], refresh: ['加载中','warn'], disconnect: ['禁用','gray'], list: ['实时更新','warn'], detail: ['未选择','gray'] },
-        selected:     { tray: ['蓝色','info'], btBtn: ['关闭蓝牙','on'], refresh: ['启用','on'], disconnect: ['禁用','gray'], list: ['选中高亮','info'], detail: ['详情+连接','on'] },
-        connecting:   { tray: ['黄色','warn'], btBtn: ['关闭蓝牙','on'], refresh: ['禁用','gray'], disconnect: ['禁用','gray'], list: ['禁用','gray'], detail: ['连接中...','warn'] },
-        connected:    { tray: ['绿色','on'], btBtn: ['关闭蓝牙','on'], refresh: ['启用','on'], disconnect: ['启用','on'], list: ['选中高亮','info'], detail: ['详情+断开','on'] },
-        disconnecting:{ tray: ['黄色','warn'], btBtn: ['关闭蓝牙','on'], refresh: ['禁用','gray'], disconnect: ['禁用','gray'], list: ['禁用','gray'], detail: ['断开中...','warn'] },
+        bt_off:       { tray: ['灰色','off'], btSwitch: ['OFF (启用)','gray'], refresh: ['禁用','gray'], actions: ['无','gray'], list: ['空状态','gray'], detail: ['隐藏','gray'] },
+        bt_on_idle:   { tray: ['蓝色','info'], btSwitch: ['ON (启用)','on'], refresh: ['启用','on'], actions: ['按状态','on'], list: ['上次/空','info'], detail: ['隐藏','gray'] },
+        scanning:     { tray: ['旋转','warn'], btSwitch: ['ON (禁用)','warn'], refresh: ['加载中','warn'], actions: ['禁用','gray'], list: ['实时更新','warn'], detail: ['隐藏(收起)','gray'] },
+        selected:     { tray: ['蓝色','info'], btSwitch: ['ON (启用)','on'], refresh: ['启用','on'], actions: ['按状态','on'], list: ['选中高亮','info'], detail: ['展开详情','on'] },
+        connecting:   { tray: ['黄色','warn'], btSwitch: ['ON (禁用)','warn'], refresh: ['禁用','gray'], actions: ['连接中...','warn'], list: ['禁用','gray'], detail: ['展开详情','warn'] },
+        connected:    { tray: ['绿色','on'], btSwitch: ['ON (启用)','on'], refresh: ['启用','on'], actions: ['[断开][删除]','on'], list: ['选中高亮','info'], detail: ['展开详情','on'] },
+        disconnecting:{ tray: ['黄色','warn'], btSwitch: ['ON (禁用)','warn'], refresh: ['禁用','gray'], actions: ['断开中...','warn'], list: ['禁用','gray'], detail: ['展开详情','warn'] },
+        delete_confirm:{ tray: ['不变','info'], btSwitch: ['ON (禁用)','warn'], refresh: ['禁用','gray'], actions: ['禁用','gray'], list: ['禁用','gray'], detail: ['展开详情','gray'] },
     };
     const c = configs[state];
     document.getElementById('trayIconDesc').textContent = c.tray[0];
     document.getElementById('trayIconDesc').className = 'badge ' + c.tray[1];
-    document.getElementById('btBtnDesc').textContent = c.btBtn[0];
-    document.getElementById('btBtnDesc').className = 'badge ' + c.btBtn[1];
+    document.getElementById('btBtnDesc').textContent = c.btSwitch[0];
+    document.getElementById('btBtnDesc').className = 'badge ' + c.btSwitch[1];
     document.getElementById('refreshDesc').textContent = c.refresh[0];
     document.getElementById('refreshDesc').className = 'badge ' + c.refresh[1];
-    document.getElementById('disconnectDesc').textContent = c.disconnect[0];
-    document.getElementById('disconnectDesc').className = 'badge ' + c.disconnect[1];
+    document.getElementById('actionsDesc').textContent = c.actions[0];
+    document.getElementById('actionsDesc').className = 'badge ' + c.actions[1];
     document.getElementById('listDesc').textContent = c.list[0];
     document.getElementById('listDesc').className = 'badge ' + c.list[1];
     document.getElementById('detailDesc').textContent = c.detail[0];
     document.getElementById('detailDesc').className = 'badge ' + c.detail[1];
 
-    // 更新托盘菜单
-    const trayDisconnect = document.getElementById('trayDisconnect');
-    if (state === 'connected') {
-        trayDisconnect.classList.remove('disabled');
-        trayDisconnect.onclick = () => setState('disconnecting');
-    } else {
-        trayDisconnect.classList.add('disabled');
-        trayDisconnect.onclick = null;
-    }
-
     const trayRefresh = document.getElementById('trayRefresh');
-    if (state === 'bt_off' || state === 'scanning' || state === 'connecting' || state === 'disconnecting') {
+    if (state === 'bt_off' || state === 'scanning' || state === 'connecting' || state === 'disconnecting' || state === 'delete_confirm') {
         trayRefresh.classList.add('disabled');
         trayRefresh.onclick = null;
     } else {
@@ -1084,11 +1311,21 @@ function updateStateButtons(state) {
         };
         btns[idx].classList.add(colorMap[state]);
     }
+    if (state === 'delete_confirm') {
+        if (previousState === 'connected') {
+            document.querySelectorAll('.state-btn')[5].classList.add('active-green');
+        } else {
+            document.querySelectorAll('.state-btn')[3].classList.add('active');
+        }
+    }
 }
 
 function setState(state) {
     if (scanTimer) { clearInterval(scanTimer); scanTimer = null; }
 
+    if (state !== 'delete_confirm') {
+        previousState = currentState;
+    }
     currentState = state;
     const overlay = document.getElementById('scanningOverlay');
 
@@ -1098,38 +1335,36 @@ function setState(state) {
     switch (state) {
         case 'bt_off':
             setIndicator('off');
-            setButton('btnBluetooth', true, '开启蓝牙', 'success');
+            setBtSwitch(false, true);
             setButton('btnRefresh', false, '刷新', '');
-            setButton('btnDisconnect', false, '断开', '');
             document.getElementById('trayBtText').textContent = '开启蓝牙';
             document.getElementById('trayBtIcon').textContent = '🔵';
             overlay.style.display = 'none';
+            document.getElementById('deleteModal').classList.remove('visible');
+            hideDetailPanel();
             renderDeviceList([]);
-            renderDetailEmpty('请先开启蓝牙', '📡');
             selectedDevice = null;
             break;
 
         case 'bt_on_idle':
             setIndicator('on');
-            setButton('btnBluetooth', true, '关闭蓝牙', 'error');
+            setBtSwitch(true, true);
             setButton('btnRefresh', true, '刷新', '');
-            setButton('btnDisconnect', false, '断开', '');
             document.getElementById('trayBtText').textContent = '关闭蓝牙';
             document.getElementById('trayBtIcon').textContent = '🔵';
             overlay.style.display = 'none';
+            document.getElementById('deleteModal').classList.remove('visible');
             renderDeviceList([]);
-            renderDetailEmpty('请从列表中选择一个设备', '📱');
-            selectedDevice = null;
             break;
 
         case 'scanning':
             setIndicator('scanning');
-            setButton('btnBluetooth', true, '关闭蓝牙', 'error');
+            setBtSwitch(true, false);
             setButton('btnRefresh', false, '刷新', '');
-            // 显示加载动画在按钮上
             document.getElementById('btnRefresh').innerHTML = '<span class="spinner"></span> <span>扫描中</span>';
-            setButton('btnDisconnect', false, '断开', '');
             overlay.style.display = 'flex';
+            document.getElementById('deleteModal').classList.remove('visible');
+            hideDetailPanel();
             selectedDevice = null;
             scanCount = 0;
 
@@ -1145,8 +1380,8 @@ function setState(state) {
                     overlay.style.display = 'none';
                     document.getElementById('btnRefresh').innerHTML = '<span>🔄</span> <span>刷新</span>';
                     setButton('btnRefresh', true, '刷新', '');
+                    setBtSwitch(true, true);
                     renderDeviceList(DEVICES, true);
-                    renderDetailEmpty('请从列表中选择一个设备', '📱');
                     currentState = 'bt_on_idle';
                     updateStateButtons('bt_on_idle');
                     updateStatusPanel('bt_on_idle');
@@ -1154,58 +1389,85 @@ function setState(state) {
                 }
             }, 600);
             renderDeviceList([], false);
-            renderDetailEmpty('请从列表中选择一个设备', '📱');
             break;
 
         case 'selected':
             if (selectedDevice === null) selectedDevice = 0;
             setIndicator('on');
-            setButton('btnBluetooth', true, '关闭蓝牙', 'error');
+            setBtSwitch(true, true);
             setButton('btnRefresh', true, '刷新', '');
-            setButton('btnDisconnect', false, '断开', '');
             overlay.style.display = 'none';
+            document.getElementById('deleteModal').classList.remove('visible');
             renderDeviceList(DEVICES, true);
             renderDetail(DEVICES[selectedDevice], 'selected');
+            showDetailPanel();
             break;
 
         case 'connecting':
             setIndicator('scanning');
-            setButton('btnBluetooth', true, '关闭蓝牙', 'error');
+            setBtSwitch(true, false);
             setButton('btnRefresh', false, '刷新', '');
-            setButton('btnDisconnect', false, '断开', '');
             overlay.style.display = 'none';
+            document.getElementById('deleteModal').classList.remove('visible');
             renderDeviceList(DEVICES, false);
             renderDetail(DEVICES[selectedDevice], 'connecting');
+            showDetailPanel();
             setTimeout(() => setState('connected'), 2000);
             break;
 
         case 'connected':
             setIndicator('on');
-            setButton('btnBluetooth', true, '关闭蓝牙', 'error');
+            setBtSwitch(true, true);
             setButton('btnRefresh', true, '刷新', '');
-            setButton('btnDisconnect', true, '断开', 'error');
             overlay.style.display = 'none';
+            document.getElementById('deleteModal').classList.remove('visible');
             renderDeviceList(DEVICES, false);
             renderDetail(DEVICES[selectedDevice], 'connected');
+            showDetailPanel();
             break;
 
         case 'disconnecting':
             setIndicator('scanning');
-            setButton('btnBluetooth', true, '关闭蓝牙', 'error');
+            setBtSwitch(true, false);
             setButton('btnRefresh', false, '刷新', '');
-            setButton('btnDisconnect', false, '断开', '');
             overlay.style.display = 'none';
+            document.getElementById('deleteModal').classList.remove('visible');
             renderDeviceList(DEVICES, false);
             renderDetail(DEVICES[selectedDevice], 'disconnecting');
+            showDetailPanel();
             setTimeout(() => {
-                setState('bt_on_idle');
+                selectedDevice = null;
+                hideDetailPanel();
+                currentState = 'bt_on_idle';
+                updateStateButtons('bt_on_idle');
+                updateStatusPanel('bt_on_idle');
+                setIndicator('on');
+                setBtSwitch(true, true);
+                setButton('btnRefresh', true, '刷新', '');
+                overlay.style.display = 'none';
                 renderDeviceList(DEVICES, true);
             }, 1500);
+            break;
+
+        case 'delete_confirm':
+            overlay.style.display = 'none';
+            document.getElementById('deleteModal').classList.add('visible');
+            setButton('btnRefresh', false, '刷新', '');
+            renderDeviceList(DEVICES, false);
             break;
     }
 }
 
 function selectDevice(index) {
+    if (selectedDevice === index && (currentState === 'selected' || currentState === 'connected')) {
+        selectedDevice = null;
+        hideDetailPanel();
+        renderDeviceList(DEVICES, true);
+        currentState = 'bt_on_idle';
+        updateStateButtons('bt_on_idle');
+        updateStatusPanel('bt_on_idle');
+        return;
+    }
     selectedDevice = index;
     setState('selected');
 }
@@ -1222,6 +1484,54 @@ function doDisconnect() {
     if (currentState === 'connected') {
         setState('disconnecting');
     }
+}
+
+function doPrimaryAction(index) {
+    selectedDevice = index;
+    setState('connecting');
+}
+
+function requestDelete(index) {
+    deleteTargetDevice = index;
+    previousState = currentState;
+    const device = DEVICES[index];
+    document.getElementById('deleteDeviceName').textContent = '"' + device.name + '"';
+    currentState = 'delete_confirm';
+    updateStateButtons('delete_confirm');
+    updateStatusPanel('delete_confirm');
+    document.getElementById('deleteModal').classList.add('visible');
+    renderDeviceList(DEVICES, false);
+}
+
+function cancelDelete() {
+    deleteTargetDevice = null;
+    document.getElementById('deleteModal').classList.remove('visible');
+    if (selectedDevice !== null) {
+        setState('selected');
+    } else {
+        setState('bt_on_idle');
+    }
+}
+
+function confirmDelete() {
+    if (deleteTargetDevice === null) return;
+    const device = DEVICES[deleteTargetDevice];
+    deletedDevices.add(device.address);
+    document.getElementById('deleteModal').classList.remove('visible');
+    deleteTargetDevice = null;
+    if (selectedDevice !== null && DEVICES[selectedDevice] && DEVICES[selectedDevice].address === device.address) {
+        selectedDevice = null;
+        hideDetailPanel();
+    }
+    currentState = 'bt_on_idle';
+    previousState = 'bt_on_idle';
+    updateStateButtons('bt_on_idle');
+    updateStatusPanel('bt_on_idle');
+    setIndicator('on');
+    setBtSwitch(true, true);
+    setButton('btnRefresh', true, '刷新', '');
+    document.getElementById('scanningOverlay').style.display = 'none';
+    renderDeviceList(DEVICES, true);
 }
 
 // 初始状态
