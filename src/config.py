@@ -54,13 +54,3 @@ def get_resource_path(relative_path: str) -> str:
     else:
         base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "resources")
     return os.path.join(base_path, relative_path)
-
-
-def check_admin_privilege() -> bool:
-    try:
-        return bool(ctypes.windll.shell32.IsUserAnAdmin())
-    except Exception:
-        return False
-
-
-import ctypes

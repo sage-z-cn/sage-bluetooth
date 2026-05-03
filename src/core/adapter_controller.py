@@ -1,14 +1,48 @@
 import asyncio
-import ctypes
-import logging
 import subprocess
 
 from PyQt6.QtCore import QObject, pyqtSignal
 
-from src.config import check_admin_privilege
 from src.utils.logger import get_logger
 
 logger = get_logger("adapter")
+
+_PS_GET_RADIO = """
+Add-Type -AssemblyName System.Runtime.WindowsRuntime
+$null = [Windows.Devices.Radios.Radio, Windows.Devices.Radios, ContentType=WindowsRuntime]
+$null = [Windows.Foundation.IAsyncOperation`1, Windows.Foundation, ContentType=WindowsRuntime]
+$asTask = ([System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object {
+    $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation`1'
+} | Select-Object -First 1).MakeGenericMethod([System.Collections.Generic.IReadOnlyList[Windows.Devices.Radios.Radio]])
+$task = $asTask.Invoke($null, @([Windows.Devices.Radios.Radio]::GetRadiosAsync()))
+$radios = $task.GetAwaiter().GetResult()
+$btRadio = $radios | Where-Object { $_.Kind -eq [Windows.Devices.Radios.RadioKind]::Bluetooth } | Select-Object -First 1
+$btRadio
+"""
+
+_PS_RADIO_STATE = _PS_GET_RADIO + """
+if ($btRadio) {
+    $btRadio.State -eq [Windows.Devices.Radios.RadioState]::On
+} else {
+    Write-Output "false"
+}
+"""
+
+_PS_RADIO_ON = _PS_GET_RADIO + """
+if ($btRadio) {
+    $btRadio.SetStateAsync([Windows.Devices.Radios.RadioState]::On) | Out-Null
+} else {
+    throw "No Bluetooth radio found"
+}
+"""
+
+_PS_RADIO_OFF = _PS_GET_RADIO + """
+if ($btRadio) {
+    $btRadio.SetStateAsync([Windows.Devices.Radios.RadioState]::Off) | Out-Null
+} else {
+    throw "No Bluetooth radio found"
+}
+"""
 
 
 class AdapterController(QObject):
@@ -18,10 +52,7 @@ class AdapterController(QObject):
     def is_adapter_on(self) -> bool:
         try:
             result = subprocess.run(
-                [
-                    "powershell", "-Command",
-                    "(Get-PnpDevice -Class Bluetooth -Status OK -ErrorAction SilentlyContinue).Count -gt 0",
-                ],
+                ["powershell", "-Command", _PS_RADIO_STATE],
                 capture_output=True, text=True, timeout=10,
             )
             return result.stdout.strip().lower() == "true"
@@ -30,21 +61,9 @@ class AdapterController(QObject):
             return False
 
     async def turn_on(self) -> bool:
-        if not check_admin_privilege():
-            msg = "开启蓝牙需要管理员权限，请右键以管理员身份运行本程序"
-            self.error_occurred.emit(msg)
-            return False
-
         try:
-            instance_id = await self._get_bluetooth_instance_id()
-            if not instance_id:
-                self.error_occurred.emit("未找到蓝牙适配器")
-                return False
-
-            await self._run_ps(
-                f"Enable-PnpDevice -InstanceId '{instance_id}' -Confirm:$false"
-            )
-            await asyncio.sleep(1.0)
+            await self._run_ps(_PS_RADIO_ON)
+            await asyncio.sleep(0.5)
             if self.is_adapter_on():
                 self.state_changed.emit(True)
                 logger.info("Bluetooth adapter turned on")
@@ -59,21 +78,9 @@ class AdapterController(QObject):
             return False
 
     async def turn_off(self) -> bool:
-        if not check_admin_privilege():
-            msg = "关闭蓝牙需要管理员权限，请右键以管理员身份运行本程序"
-            self.error_occurred.emit(msg)
-            return False
-
         try:
-            instance_id = await self._get_bluetooth_instance_id()
-            if not instance_id:
-                self.error_occurred.emit("未找到蓝牙适配器")
-                return False
-
-            await self._run_ps(
-                f"Disable-PnpDevice -InstanceId '{instance_id}' -Confirm:$false"
-            )
-            await asyncio.sleep(1.0)
+            await self._run_ps(_PS_RADIO_OFF)
+            await asyncio.sleep(0.5)
             if not self.is_adapter_on():
                 self.state_changed.emit(False)
                 logger.info("Bluetooth adapter turned off")
@@ -86,15 +93,6 @@ class AdapterController(QObject):
             self.error_occurred.emit(msg)
             logger.error(msg)
             return False
-
-    async def _get_bluetooth_instance_id(self) -> str | None:
-        cmd = (
-            "(Get-PnpDevice -Class Bluetooth -Status OK -ErrorAction SilentlyContinue "
-            "| Where-Object { $_.FriendlyName -like '*Bluetooth*' } "
-            "| Select-Object -First 1).InstanceId"
-        )
-        success, output = await self._run_ps(cmd)
-        return output.strip() if success and output.strip() else None
 
     async def _run_ps(self, command: str) -> tuple[bool, str]:
         loop = asyncio.get_event_loop()
