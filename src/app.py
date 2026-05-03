@@ -58,6 +58,9 @@ class App:
             self._bt_mgr.turn_off_adapter()
 
     def _on_refresh(self):
+        if not self._bt_mgr.is_adapter_on():
+            self._on_error("蓝牙适配器未开启，请先打开蓝牙")
+            return
         self._window.hide_device_detail()
         self._window.get_device_list().clear()
         self._window.set_scanning(True)

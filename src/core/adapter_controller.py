@@ -22,6 +22,16 @@ class AdapterController(QObject):
             logger.error("Failed to check adapter state: %s", e)
             return False
 
+    async def is_adapter_on_async(self) -> bool:
+        try:
+            bt_radio = await self._get_bluetooth_radio()
+            if bt_radio is None:
+                return False
+            return bt_radio.state == RadioState.ON
+        except Exception as e:
+            logger.error("Failed to check adapter state: %s", e)
+            return False
+
     async def turn_on(self) -> bool:
         try:
             bt_radio = await self._get_bluetooth_radio()
@@ -84,10 +94,6 @@ class AdapterController(QObject):
         return None
 
     def _get_bluetooth_radio_sync(self) -> Radio | None:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            future = asyncio.ensure_future(self._get_bluetooth_radio())
-            import concurrent.futures
-            with concurrent.futures.ThreadPoolExecutor() as pool:
-                return pool.submit(asyncio.run, self._get_bluetooth_radio()).result()
-        return asyncio.run(self._get_bluetooth_radio())
+        import concurrent.futures
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            return pool.submit(asyncio.run, self._get_bluetooth_radio()).result()
