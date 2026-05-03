@@ -1,48 +1,11 @@
 import asyncio
-import subprocess
 
 from PyQt6.QtCore import QObject, pyqtSignal
+from winsdk.windows.devices.radios import Radio, RadioKind, RadioState
 
 from src.utils.logger import get_logger
 
 logger = get_logger("adapter")
-
-_PS_GET_RADIO = """
-Add-Type -AssemblyName System.Runtime.WindowsRuntime
-$null = [Windows.Devices.Radios.Radio, Windows.Devices.Radios, ContentType=WindowsRuntime]
-$null = [Windows.Foundation.IAsyncOperation`1, Windows.Foundation, ContentType=WindowsRuntime]
-$asTask = ([System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object {
-    $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation`1'
-} | Select-Object -First 1).MakeGenericMethod([System.Collections.Generic.IReadOnlyList[Windows.Devices.Radios.Radio]])
-$task = $asTask.Invoke($null, @([Windows.Devices.Radios.Radio]::GetRadiosAsync()))
-$radios = $task.GetAwaiter().GetResult()
-$btRadio = $radios | Where-Object { $_.Kind -eq [Windows.Devices.Radios.RadioKind]::Bluetooth } | Select-Object -First 1
-$btRadio
-"""
-
-_PS_RADIO_STATE = _PS_GET_RADIO + """
-if ($btRadio) {
-    $btRadio.State -eq [Windows.Devices.Radios.RadioState]::On
-} else {
-    Write-Output "false"
-}
-"""
-
-_PS_RADIO_ON = _PS_GET_RADIO + """
-if ($btRadio) {
-    $btRadio.SetStateAsync([Windows.Devices.Radios.RadioState]::On) | Out-Null
-} else {
-    throw "No Bluetooth radio found"
-}
-"""
-
-_PS_RADIO_OFF = _PS_GET_RADIO + """
-if ($btRadio) {
-    $btRadio.SetStateAsync([Windows.Devices.Radios.RadioState]::Off) | Out-Null
-} else {
-    throw "No Bluetooth radio found"
-}
-"""
 
 
 class AdapterController(QObject):
@@ -51,20 +14,29 @@ class AdapterController(QObject):
 
     def is_adapter_on(self) -> bool:
         try:
-            result = subprocess.run(
-                ["powershell", "-Command", _PS_RADIO_STATE],
-                capture_output=True, text=True, timeout=10,
-            )
-            return result.stdout.strip().lower() == "true"
+            bt_radio = self._get_bluetooth_radio_sync()
+            if bt_radio is None:
+                return False
+            return bt_radio.state == RadioState.ON
         except Exception as e:
             logger.error("Failed to check adapter state: %s", e)
             return False
 
     async def turn_on(self) -> bool:
         try:
-            await self._run_ps(_PS_RADIO_ON)
+            bt_radio = await self._get_bluetooth_radio()
+            if bt_radio is None:
+                self.error_occurred.emit("未找到蓝牙适配器")
+                return False
+
+            if bt_radio.state == RadioState.ON:
+                self.state_changed.emit(True)
+                return True
+
+            result = await bt_radio.set_state_async(RadioState.ON)
             await asyncio.sleep(0.5)
-            if self.is_adapter_on():
+
+            if result == RadioState.ON or self.is_adapter_on():
                 self.state_changed.emit(True)
                 logger.info("Bluetooth adapter turned on")
                 return True
@@ -79,9 +51,19 @@ class AdapterController(QObject):
 
     async def turn_off(self) -> bool:
         try:
-            await self._run_ps(_PS_RADIO_OFF)
+            bt_radio = await self._get_bluetooth_radio()
+            if bt_radio is None:
+                self.error_occurred.emit("未找到蓝牙适配器")
+                return False
+
+            if bt_radio.state == RadioState.OFF:
+                self.state_changed.emit(False)
+                return True
+
+            result = await bt_radio.set_state_async(RadioState.OFF)
             await asyncio.sleep(0.5)
-            if not self.is_adapter_on():
+
+            if result == RadioState.OFF or not self.is_adapter_on():
                 self.state_changed.emit(False)
                 logger.info("Bluetooth adapter turned off")
                 return True
@@ -94,15 +76,18 @@ class AdapterController(QObject):
             logger.error(msg)
             return False
 
-    async def _run_ps(self, command: str) -> tuple[bool, str]:
+    async def _get_bluetooth_radio(self) -> Radio | None:
+        radios = await Radio.get_radios_async()
+        for radio in radios:
+            if radio.kind == RadioKind.BLUETOOTH:
+                return radio
+        return None
+
+    def _get_bluetooth_radio_sync(self) -> Radio | None:
         loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(
-            None,
-            lambda: subprocess.run(
-                ["powershell", "-Command", command],
-                capture_output=True, text=True, timeout=15,
-            ),
-        )
-        success = result.returncode == 0
-        output = result.stdout if success else result.stderr
-        return success, output
+        if loop.is_running():
+            future = asyncio.ensure_future(self._get_bluetooth_radio())
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as pool:
+                return pool.submit(asyncio.run, self._get_bluetooth_radio()).result()
+        return asyncio.run(self._get_bluetooth_radio())

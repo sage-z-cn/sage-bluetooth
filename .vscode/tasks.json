@@ -4,8 +4,8 @@
         {
             "label": "Run Application",
             "type": "shell",
-            "command": "python",
-            "args": ["-m", "src.main"],
+            "command": "uv",
+            "args": ["run", "--python", "3.12", "python", "-m", "src.main"],
             "options": {
                 "env": {
                     "PYTHONPATH": "${workspaceFolder}"
@@ -25,8 +25,8 @@
         {
             "label": "Run Tests",
             "type": "shell",
-            "command": "python",
-            "args": ["-m", "pytest", "tests/", "-v"],
+            "command": "uv",
+            "args": ["run", "--python", "3.12", "python", "-m", "pytest", "tests/", "-v"],
             "group": "test",
             "presentation": {
                 "reveal": "always",
@@ -37,8 +37,8 @@
         {
             "label": "PyInstaller Build",
             "type": "shell",
-            "command": "python",
-            "args": ["build.py"],
+            "command": "uv",
+            "args": ["run", "--python", "3.12", "python", "build.py"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -49,8 +49,8 @@
         {
             "label": "Install Dependencies",
             "type": "shell",
-            "command": "pip",
-            "args": ["install", "-r", "requirements.txt"],
+            "command": "uv",
+            "args": ["pip", "install", "-r", "requirements.txt"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -61,8 +61,8 @@
         {
             "label": "Install Dev Dependencies",
             "type": "shell",
-            "command": "pip",
-            "args": ["install", "-r", "requirements-dev.txt"],
+            "command": "uv",
+            "args": ["pip", "install", "-r", "requirements-dev.txt"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
