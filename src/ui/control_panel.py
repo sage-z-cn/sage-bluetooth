@@ -50,9 +50,9 @@ class ToggleSwitch(QWidget):
 
 
 class SpinButton(QPushButton):
-    def __init__(self, text="🔄", parent=None):
+    def __init__(self, text="刷新", parent=None):
         super().__init__(text, parent)
-        self.setFixedSize(36, 36)
+        self.setFixedSize(52, 32)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self._angle = 0
         self._timer = QTimer(self)
@@ -107,7 +107,7 @@ class ControlPanel(QWidget):
         layout.addWidget(self._label)
         layout.addStretch()
 
-        self._refresh_btn = SpinButton("🔄")
+        self._refresh_btn = SpinButton("刷新")
         self._refresh_btn.setObjectName("Primary")
         self._refresh_btn.clicked.connect(self.refresh_clicked.emit)
         layout.addWidget(self._refresh_btn)
