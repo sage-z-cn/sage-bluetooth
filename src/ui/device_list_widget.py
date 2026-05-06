@@ -252,6 +252,7 @@ class DeviceListWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._devices: dict[str, DeviceItemWidget] = {}
+        self._device_order: list[str] = []
         self._selected_address: str | None = None
 
         layout = QVBoxLayout(self)
@@ -287,6 +288,12 @@ class DeviceListWidget(QWidget):
 
         self._stack.setCurrentWidget(self._empty)
 
+    def _is_unknown(self, address: str) -> bool:
+        item = self._devices.get(address)
+        if item is None:
+            return False
+        return item._model.name == "Unknown"
+
     def add_device(self, model: BLEDeviceModel):
         if model.address in self._devices:
             self.update_device(model)
@@ -300,7 +307,22 @@ class DeviceListWidget(QWidget):
         item.selected.connect(self._on_device_selected)
 
         self._devices[model.address] = item
-        self._list_layout.insertWidget(self._list_layout.count() - 1, item)
+
+        is_unknown = model.name == "Unknown"
+        insert_index = self._list_layout.count() - 1
+        if not is_unknown:
+            first_unknown = -1
+            for i, addr in enumerate(self._device_order):
+                if self._is_unknown(addr):
+                    first_unknown = i
+                    break
+            if first_unknown >= 0:
+                insert_index = first_unknown
+        self._device_order.insert(
+            insert_index if insert_index < len(self._device_order) else len(self._device_order),
+            model.address,
+        )
+        self._list_layout.insertWidget(insert_index, item)
 
         if self._stack.currentWidget() != self._scroll:
             self._stack.setCurrentWidget(self._scroll)
@@ -315,6 +337,8 @@ class DeviceListWidget(QWidget):
 
     def remove_device(self, address: str):
         item = self._devices.pop(address, None)
+        if address in self._device_order:
+            self._device_order.remove(address)
         if item:
             item.deleteLater()
             if not self._devices:
@@ -331,6 +355,7 @@ class DeviceListWidget(QWidget):
         for item in self._devices.values():
             item.deleteLater()
         self._devices.clear()
+        self._device_order.clear()
         self._selected_address = None
         self._stack.setCurrentWidget(self._empty)
 

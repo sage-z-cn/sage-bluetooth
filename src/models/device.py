@@ -73,7 +73,7 @@ class BLEDeviceModel:
     def display_name(self) -> str:
         if self.name != "Unknown":
             return self.name
-        return f"Unknown ({self.address[-5:]})"
+        return "未知设备"
 
     @property
     def signal_quality(self) -> int:
