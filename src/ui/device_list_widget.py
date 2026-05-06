@@ -111,6 +111,7 @@ class DeviceItemWidget(QWidget):
         self._delete_btn.setObjectName("Muted")
         self._delete_btn.setFixedWidth(64)
         self._delete_btn.clicked.connect(lambda: self.delete_clicked.emit(self._model.address))
+        self._delete_btn.setVisible(model.is_paired)
         btn_layout.addWidget(self._delete_btn)
 
         layout.addLayout(btn_layout)
@@ -136,6 +137,7 @@ class DeviceItemWidget(QWidget):
         if model.connection_state == ConnectionState.CONNECTED:
             name_text += "  ✅已连接"
         self._name_lbl.setText(name_text)
+        self._delete_btn.setVisible(model.is_paired)
 
     def update_connection_state(self, state: ConnectionState):
         self._model = self._model.with_updates(connection_state=state)
