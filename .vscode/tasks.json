@@ -4,7 +4,7 @@
         {
             "label": "Run Application",
             "type": "shell",
-            "command": "python",
+            "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
             "args": ["dev.py"],
             "options": {
                 "env": {
@@ -25,7 +25,7 @@
         {
             "label": "Run Tests",
             "type": "shell",
-            "command": "python",
+            "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
             "args": ["-m", "pytest", "tests/", "-v"],
             "group": "test",
             "presentation": {
@@ -37,7 +37,7 @@
         {
             "label": "PyInstaller Build",
             "type": "shell",
-            "command": "python",
+            "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
             "args": ["build.py"],
             "group": "build",
             "presentation": {
@@ -49,7 +49,7 @@
         {
             "label": "Install Dependencies",
             "type": "shell",
-            "command": "pip",
+            "command": "${workspaceFolder}\\.venv\\Scripts\\pip.exe",
             "args": ["install", "-r", "requirements.txt"],
             "group": "build",
             "presentation": {
@@ -61,7 +61,7 @@
         {
             "label": "Install Dev Dependencies",
             "type": "shell",
-            "command": "pip",
+            "command": "${workspaceFolder}\\.venv\\Scripts\\pip.exe",
             "args": ["install", "-r", "requirements-dev.txt"],
             "group": "build",
             "presentation": {
