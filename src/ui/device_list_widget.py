@@ -267,6 +267,7 @@ class DeviceListWidget(QWidget):
         self._scroll.setWidgetResizable(True)
         self._scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self._scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        self._scroll.verticalScrollBar().setObjectName("DeviceListVScrollBar")
 
         self._list_widget = QWidget()
         self._list_widget.setObjectName("DeviceListContent")

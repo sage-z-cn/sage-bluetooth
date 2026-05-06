@@ -42,6 +42,29 @@ QLabel#EmptySubtitle { font-size: 12px; color: #9E9E9E; }
 
 QWidget#MainWindow { background: #FAFAFA; border: 1px solid #E0E0E0; border-radius: 8px; }
 QScrollArea#DeviceListScroll { background: #FAFAFA; }
+QScrollBar#DeviceListVScrollBar {
+    background: transparent;
+    width: 8px;
+    margin: 0;
+    border: none;
+}
+QScrollBar#DeviceListVScrollBar::handle:vertical {
+    background: #BDBDBD;
+    border-radius: 4px;
+    min-height: 30px;
+}
+QScrollBar#DeviceListVScrollBar::handle:vertical:hover {
+    background: #9E9E9E;
+}
+QScrollBar#DeviceListVScrollBar::add-line:vertical,
+QScrollBar#DeviceListVScrollBar::sub-line:vertical {
+    height: 0;
+    border: none;
+}
+QScrollBar#DeviceListVScrollBar::add-page:vertical,
+QScrollBar#DeviceListVScrollBar::sub-page:vertical {
+    background: none;
+}
 QWidget#DeviceListContent { background: #FAFAFA; }
 QWidget#DeviceListStack { background: #FAFAFA; }
 """
@@ -90,6 +113,29 @@ QLabel#EmptySubtitle { font-size: 12px; color: #757575; }
 
 QWidget#MainWindow { background: #1E1E1E; border: 1px solid #3C3C3C; border-radius: 8px; }
 QScrollArea#DeviceListScroll { background: #1E1E1E; }
+QScrollBar#DeviceListVScrollBar {
+    background: transparent;
+    width: 8px;
+    margin: 0;
+    border: none;
+}
+QScrollBar#DeviceListVScrollBar::handle:vertical {
+    background: #424242;
+    border-radius: 4px;
+    min-height: 30px;
+}
+QScrollBar#DeviceListVScrollBar::handle:vertical:hover {
+    background: #616161;
+}
+QScrollBar#DeviceListVScrollBar::add-line:vertical,
+QScrollBar#DeviceListVScrollBar::sub-line:vertical {
+    height: 0;
+    border: none;
+}
+QScrollBar#DeviceListVScrollBar::add-page:vertical,
+QScrollBar#DeviceListVScrollBar::sub-page:vertical {
+    background: none;
+}
 QWidget#DeviceListContent { background: #1E1E1E; }
 QWidget#DeviceListStack { background: #1E1E1E; }
 """
