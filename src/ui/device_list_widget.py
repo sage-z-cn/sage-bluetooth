@@ -333,6 +333,10 @@ class DeviceListWidget(QWidget):
     def update_device(self, model: BLEDeviceModel):
         item = self._devices.get(model.address)
         if item:
+            if item._model.is_paired and not model.is_paired:
+                model = model.with_updates(is_paired=True)
+            if model.name == "Unknown" and item._model.name != "Unknown":
+                model = model.with_updates(name=item._model.name)
             item.update_model(model)
 
     def remove_device(self, address: str):

@@ -54,6 +54,8 @@ class DeviceScanner(QObject):
                     manufacturer_data=new_model.manufacturer_data or old.manufacturer_data,
                     service_uuids=new_model.service_uuids or old.service_uuids,
                     tx_power=new_model.tx_power or old.tx_power,
+                    is_paired=old.is_paired,
+                    name=new_model.name if new_model.name != "Unknown" else old.name,
                 )
                 self._discovered[address] = merged
                 self.device_updated.emit(merged)

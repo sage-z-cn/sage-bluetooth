@@ -7,6 +7,7 @@ from src.core.adapter_controller import AdapterController
 from src.core.device_connector import DeviceConnector
 from src.core.device_scanner import DeviceScanner
 from src.core.gatt_reader import GattReader
+from src.core.paired_device_loader import PairedDeviceLoader
 from src.models.device import BLEDeviceModel, ConnectionState, ScanState
 from src.models.device_info import DeviceInfoModel
 from src.services.connection_monitor import ConnectionMonitor
@@ -24,6 +25,7 @@ class BluetoothManager(QObject):
     scan_finished = pyqtSignal()
     device_discovered = pyqtSignal(BLEDeviceModel)
     device_updated = pyqtSignal(BLEDeviceModel)
+    paired_devices_loaded = pyqtSignal(list)
     connection_state_changed = pyqtSignal(str, str)
     device_info_ready = pyqtSignal(DeviceInfoModel)
     battery_level_updated = pyqtSignal(str, int)
@@ -40,6 +42,7 @@ class BluetoothManager(QObject):
         self._scanner = DeviceScanner()
         self._connector = DeviceConnector()
         self._gatt = GattReader()
+        self._paired_loader = PairedDeviceLoader()
 
         self._conn_monitor = ConnectionMonitor()
         self._conn_monitor.configure(
@@ -63,6 +66,8 @@ class BluetoothManager(QObject):
         self._scanner.scan_started.connect(self.scan_started.emit)
         self._scanner.scan_finished.connect(self.scan_finished.emit)
         self._scanner.error_occurred.connect(self.error_occurred.emit)
+
+        self._paired_loader.paired_devices_loaded.connect(self.paired_devices_loaded.emit)
 
         self._connector.connected.connect(self._on_connected)
         self._connector.disconnected.connect(self._on_disconnected)
@@ -106,6 +111,9 @@ class BluetoothManager(QObject):
 
     def start_scan(self, timeout: float = 10.0) -> None:
         self._run_async(self._scanner.start_scan(timeout))
+
+    def load_paired_devices(self) -> None:
+        self._run_async(self._paired_loader.load_paired_devices())
 
     def stop_scan(self) -> None:
         self._run_async(self._scanner.stop_scan())
@@ -171,5 +179,9 @@ class BluetoothManager(QObject):
     def _on_pairing_result(self, address: str, success: bool) -> None:
         if success:
             logger.info("Pairing succeeded: %s", address)
+            discovered = self._scanner._discovered
+            if address in discovered:
+                discovered[address] = discovered[address].with_updates(is_paired=True)
+                self.device_updated.emit(discovered[address])
         else:
             self.error_occurred.emit("配对失败")

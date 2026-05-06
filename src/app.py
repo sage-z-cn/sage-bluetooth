@@ -1,5 +1,6 @@
 import asyncio
 
+from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QApplication, QSystemTrayIcon, QMessageBox
 
 from src.core.bluetooth_manager import BluetoothManager
@@ -38,11 +39,12 @@ class App:
         self._tray.theme_toggled.connect(self._on_theme_toggled)
         self._tray.exit_clicked.connect(self._quit)
 
-        self._bt_mgr.adapter_state_changed.connect(self._tray.set_bluetooth_state)
+        self._bt_mgr.adapter_state_changed.connect(self._on_adapter_state_changed)
         self._bt_mgr.error_occurred.connect(self._on_error)
         self._bt_mgr.connection_state_changed.connect(self._on_connection_state_changed)
         self._bt_mgr.scan_started.connect(self._on_scan_started)
         self._bt_mgr.scan_finished.connect(self._on_scan_finished)
+        self._bt_mgr.paired_devices_loaded.connect(self._on_paired_devices_loaded)
         self._bt_mgr.battery_critical.connect(self._on_battery_critical)
         self._bt_mgr.reconnection_started.connect(self._on_reconnection_started)
         self._bt_mgr.reconnection_succeeded.connect(self._on_reconnection_succeeded)
@@ -53,10 +55,13 @@ class App:
         self._window.set_bluetooth_state(is_on)
         self._tray.set_bluetooth_state(is_on)
         self._tray.show()
+        if is_on:
+            QTimer.singleShot(0, self._bt_mgr.load_paired_devices)
 
     def _on_bluetooth_toggled(self, on: bool):
         if on:
             self._bt_mgr.turn_on_adapter()
+            self._bt_mgr.load_paired_devices()
         else:
             self._window.hide_device_detail()
             self._bt_mgr.turn_off_adapter()
@@ -68,6 +73,7 @@ class App:
         self._window.hide_device_detail()
         self._bt_mgr.stop_scan()
         self._window.get_device_list().clear()
+        self._bt_mgr.load_paired_devices()
         self._bt_mgr.start_scan()
 
     def _on_scan_started(self):
@@ -75,6 +81,15 @@ class App:
 
     def _on_scan_finished(self):
         self._window.set_scanning(False)
+
+    def _on_adapter_state_changed(self, on: bool):
+        self._tray.set_bluetooth_state(on)
+        if on:
+            self._bt_mgr.load_paired_devices()
+
+    def _on_paired_devices_loaded(self, devices: list):
+        for model in devices:
+            self._window.get_device_list().add_device(model)
 
     def _on_device_selected(self, address: str):
         self._bt_mgr.read_device_info(address)
