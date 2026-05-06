@@ -93,3 +93,5 @@ class DeviceScanner(QObject):
                 await self._scanner.stop()
             except Exception as e:
                 logger.error("Error stopping scanner: %s", e)
+            self._is_scanning = False
+            self.scan_finished.emit()

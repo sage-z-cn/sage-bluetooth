@@ -82,6 +82,7 @@ class MainWindow(QWidget):
     def set_scanning(self, scanning: bool):
         self._control_panel.set_refreshing(scanning)
         self._title_bar.set_status("busy" if scanning else "on")
+        self._device_list.set_scanning(scanning)
 
     def set_auto_hide(self, enabled: bool):
         self._auto_hide = enabled

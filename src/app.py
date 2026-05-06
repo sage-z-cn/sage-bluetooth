@@ -62,8 +62,8 @@ class App:
             self._on_error("蓝牙适配器未开启，请先打开蓝牙")
             return
         self._window.hide_device_detail()
+        self._bt_mgr.stop_scan()
         self._window.get_device_list().clear()
-        self._window.set_scanning(True)
         self._bt_mgr.start_scan()
 
     def _on_scan_started(self):
