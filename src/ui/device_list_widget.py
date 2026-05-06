@@ -2,7 +2,7 @@ from PyQt6.QtCore import Qt, pyqtSignal, QTimer
 from PyQt6.QtGui import QPixmap, QPainter, QColor, QFont
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QListWidget,
-    QListWidgetItem, QSizePolicy, QStackedWidget,
+    QListWidgetItem, QSizePolicy, QStackedWidget, QScrollArea,
 )
 
 from src.config import get_resource_path
@@ -259,12 +259,19 @@ class DeviceListWidget(QWidget):
         self._stack = QStackedWidget()
         layout.addWidget(self._stack)
 
+        self._scroll = QScrollArea()
+        self._scroll.setWidgetResizable(True)
+        self._scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self._scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+
         self._list_widget = QWidget()
         self._list_layout = QVBoxLayout(self._list_widget)
         self._list_layout.setContentsMargins(0, 0, 0, 0)
         self._list_layout.setSpacing(0)
         self._list_layout.addStretch()
-        self._stack.addWidget(self._list_widget)
+
+        self._scroll.setWidget(self._list_widget)
+        self._stack.addWidget(self._scroll)
 
         self._empty = EmptyState()
         self._stack.addWidget(self._empty)
@@ -289,8 +296,8 @@ class DeviceListWidget(QWidget):
         self._devices[model.address] = item
         self._list_layout.insertWidget(self._list_layout.count() - 1, item)
 
-        if self._stack.currentWidget() == self._empty:
-            self._stack.setCurrentWidget(self._list_widget)
+        if self._stack.currentWidget() != self._scroll:
+            self._stack.setCurrentWidget(self._scroll)
 
         if self._scanning._timer.isActive():
             self._scanning.increment_count()
@@ -328,7 +335,7 @@ class DeviceListWidget(QWidget):
         else:
             self._scanning.stop()
             if self._devices:
-                self._stack.setCurrentWidget(self._list_widget)
+                self._stack.setCurrentWidget(self._scroll)
             else:
                 self._stack.setCurrentWidget(self._empty)
 
