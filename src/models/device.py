@@ -52,15 +52,21 @@ class BLEDeviceModel:
 
     @classmethod
     def from_bleak(cls, device, advertisement_data) -> "BLEDeviceModel":
+        manufacturer_data = advertisement_data.manufacturer_data
+        service_uuids = advertisement_data.service_uuids
+        if manufacturer_data is None:
+            manufacturer_data = {}
+        if service_uuids is None:
+            service_uuids = []
         return cls(
             address=device.address,
             name=device.name or advertisement_data.local_name or "Unknown",
             rssi=advertisement_data.rssi or -100,
-            appearance=advertisement_data.appearance or 0,
-            manufacturer_data=dict(advertisement_data.manufacturer_data),
-            service_uuids=list(advertisement_data.service_uuids),
+            appearance=getattr(advertisement_data, "appearance", 0) or 0,
+            manufacturer_data=dict(manufacturer_data),
+            service_uuids=list(service_uuids),
             tx_power=advertisement_data.tx_power,
-            is_connectable=advertisement_data.is_connectable,
+            is_connectable=getattr(advertisement_data, "is_connectable", True),
         )
 
     @property
