@@ -288,11 +288,33 @@ class DeviceListWidget(QWidget):
 
         self._stack.setCurrentWidget(self._empty)
 
-    def _is_unknown(self, address: str) -> bool:
+    def _device_sort_key(self, address: str) -> int:
         item = self._devices.get(address)
         if item is None:
-            return False
-        return item._model.name == "Unknown"
+            return 2
+        m = item._model
+        if m.is_paired:
+            return 0
+        if m.name == "Unknown":
+            return 2
+        return 1
+
+    def _find_insert_index(self, sort_key: int) -> int:
+        for i, addr in enumerate(self._device_order):
+            if self._device_sort_key(addr) > sort_key:
+                return i
+        return len(self._device_order)
+
+    def _resort_device(self, address: str):
+        if address not in self._device_order:
+            return
+        self._device_order.remove(address)
+        sort_key = self._device_sort_key(address)
+        insert_index = self._find_insert_index(sort_key)
+        self._device_order.insert(insert_index, address)
+        item = self._devices[address]
+        self._list_layout.removeWidget(item)
+        self._list_layout.insertWidget(insert_index, item)
 
     def add_device(self, model: BLEDeviceModel):
         if model.address in self._devices:
@@ -308,20 +330,9 @@ class DeviceListWidget(QWidget):
 
         self._devices[model.address] = item
 
-        is_unknown = model.name == "Unknown"
-        insert_index = self._list_layout.count() - 1
-        if not is_unknown:
-            first_unknown = -1
-            for i, addr in enumerate(self._device_order):
-                if self._is_unknown(addr):
-                    first_unknown = i
-                    break
-            if first_unknown >= 0:
-                insert_index = first_unknown
-        self._device_order.insert(
-            insert_index if insert_index < len(self._device_order) else len(self._device_order),
-            model.address,
-        )
+        sort_key = self._device_sort_key(model.address)
+        insert_index = self._find_insert_index(sort_key)
+        self._device_order.insert(insert_index, model.address)
         self._list_layout.insertWidget(insert_index, item)
 
         if self._stack.currentWidget() != self._scroll:
@@ -332,12 +343,17 @@ class DeviceListWidget(QWidget):
 
     def update_device(self, model: BLEDeviceModel):
         item = self._devices.get(model.address)
-        if item:
-            if item._model.is_paired and not model.is_paired:
-                model = model.with_updates(is_paired=True)
-            if model.name == "Unknown" and item._model.name != "Unknown":
-                model = model.with_updates(name=item._model.name)
-            item.update_model(model)
+        if not item:
+            return
+        old_key = self._device_sort_key(model.address)
+        if item._model.is_paired and not model.is_paired:
+            model = model.with_updates(is_paired=True)
+        if model.name == "Unknown" and item._model.name != "Unknown":
+            model = model.with_updates(name=item._model.name)
+        item.update_model(model)
+        new_key = self._device_sort_key(model.address)
+        if new_key != old_key:
+            self._resort_device(model.address)
 
     def remove_device(self, address: str):
         item = self._devices.pop(address, None)
