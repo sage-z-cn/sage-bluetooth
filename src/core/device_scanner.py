@@ -18,8 +18,6 @@ class DeviceScanner(QObject):
     scan_finished = pyqtSignal()
     error_occurred = pyqtSignal(str)
 
-    MAX_DEVICES = 50
-
     def __init__(self):
         super().__init__()
         self._scanner = None
@@ -60,9 +58,6 @@ class DeviceScanner(QObject):
                 self._discovered[address] = merged
                 self.device_updated.emit(merged)
             else:
-                if len(self._discovered) >= self.MAX_DEVICES:
-                    oldest_addr = next(iter(self._discovered))
-                    del self._discovered[oldest_addr]
                 self._discovered[address] = new_model
                 self.device_found.emit(new_model)
                 logger.info("Found device: %s (%s)", new_model.display_name, address)
