@@ -78,7 +78,9 @@ class DeviceItemWidget(QWidget):
 
         battery_text = "--"
         meta = f"{model.address}  |  类型: {dt.name if dt != DeviceType.UNKNOWN else '未知'}"
-        info_layout.addWidget(QLabel(meta))
+        meta_lbl = QLabel(meta)
+        meta_lbl.setObjectName("DeviceMeta")
+        info_layout.addWidget(meta_lbl)
 
         layout.addLayout(info_layout, 1)
 
@@ -105,9 +107,9 @@ class DeviceItemWidget(QWidget):
 
         btn_layout.addWidget(self._main_btn)
 
-        self._delete_btn = QPushButton("🗑")
+        self._delete_btn = QPushButton("删除")
         self._delete_btn.setObjectName("Muted")
-        self._delete_btn.setFixedSize(28, 24)
+        self._delete_btn.setFixedWidth(64)
         self._delete_btn.clicked.connect(lambda: self.delete_clicked.emit(self._model.address))
         btn_layout.addWidget(self._delete_btn)
 
@@ -257,14 +259,17 @@ class DeviceListWidget(QWidget):
         layout.setSpacing(0)
 
         self._stack = QStackedWidget()
+        self._stack.setObjectName("DeviceListStack")
         layout.addWidget(self._stack)
 
         self._scroll = QScrollArea()
+        self._scroll.setObjectName("DeviceListScroll")
         self._scroll.setWidgetResizable(True)
         self._scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self._scroll.setFrameShape(QScrollArea.Shape.NoFrame)
 
         self._list_widget = QWidget()
+        self._list_widget.setObjectName("DeviceListContent")
         self._list_layout = QVBoxLayout(self._list_widget)
         self._list_layout.setContentsMargins(0, 0, 0, 0)
         self._list_layout.setSpacing(0)

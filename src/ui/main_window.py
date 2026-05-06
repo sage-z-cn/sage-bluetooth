@@ -6,7 +6,7 @@ from src.ui.title_bar import TitleBar
 from src.ui.control_panel import ControlPanel
 from src.ui.device_list_widget import DeviceListWidget
 from src.ui.device_detail_widget import DeviceDetailWidget
-from src.ui.styles import MAIN_QSS
+from src.ui.styles import get_qss
 
 
 class MainWindow(QWidget):
@@ -19,7 +19,8 @@ class MainWindow(QWidget):
             | Qt.WindowType.Tool
         )
         self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
-        self.setStyleSheet(MAIN_QSS)
+        self.setStyleSheet(get_qss("light"))
+        self._theme = "light"
         self._auto_hide = True
 
         layout = QVBoxLayout(self)
@@ -116,3 +117,9 @@ class MainWindow(QWidget):
 
     def get_detail_panel(self) -> DeviceDetailWidget:
         return self._detail_panel
+
+    def apply_theme(self, theme: str):
+        self._theme = theme
+        self.setStyleSheet(get_qss(theme))
+        self._control_panel.refresh_label_style()
+        self._detail_panel.refresh_header_style()

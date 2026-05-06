@@ -70,7 +70,7 @@ class DeviceDetailWidget(QWidget):
 
         header = QHBoxLayout()
         header_lbl = QLabel("设备信息")
-        header_lbl.setStyleSheet("font-weight:bold;font-size:13px;color:#212121;")
+        header_lbl.setObjectName("DetailHeader")
         header.addWidget(header_lbl)
         header.addStretch()
         close_btn = QPushButton("✕")
@@ -163,3 +163,10 @@ class DeviceDetailWidget(QWidget):
     @property
     def is_expanded(self) -> bool:
         return self._expanded
+
+    def refresh_header_style(self):
+        for lbl, val in self._rows:
+            lbl.style().unpolish(lbl)
+            lbl.style().polish(lbl)
+            val.style().unpolish(val)
+            val.style().polish(val)

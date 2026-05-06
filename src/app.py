@@ -3,6 +3,7 @@ import asyncio
 from PyQt6.QtWidgets import QApplication, QSystemTrayIcon, QMessageBox
 
 from src.core.bluetooth_manager import BluetoothManager
+from src.models.app_config import AppConfig
 from src.models.device import ConnectionState
 from src.ui.main_window import MainWindow
 from src.ui.tray_icon import TrayIcon
@@ -10,10 +11,12 @@ from src.ui.tray_icon import TrayIcon
 
 class App:
     def __init__(self):
+        self._config = AppConfig.load()
         self._bt_mgr = BluetoothManager.instance()
         self._window = MainWindow()
-        self._tray = TrayIcon()
+        self._tray = TrayIcon(dark_mode=self._config.theme == "dark")
 
+        self._apply_theme(self._config.theme)
         self._connect_signals()
         self._init_state()
 
@@ -32,6 +35,7 @@ class App:
         self._tray.toggle_window.connect(self._window.toggle_visible)
         self._tray.toggle_bluetooth.connect(self._on_bluetooth_toggled)
         self._tray.refresh_clicked.connect(self._on_refresh)
+        self._tray.theme_toggled.connect(self._on_theme_toggled)
         self._tray.exit_clicked.connect(self._quit)
 
         self._bt_mgr.adapter_state_changed.connect(self._tray.set_bluetooth_state)
@@ -143,3 +147,12 @@ class App:
         asyncio.ensure_future(_shutdown())
         self._tray.hide()
         QApplication.instance().quit()
+
+    def _apply_theme(self, theme: str):
+        self._window.apply_theme(theme)
+
+    def _on_theme_toggled(self, dark: bool):
+        theme = "dark" if dark else "light"
+        self._config.theme = theme
+        self._config.save()
+        self._apply_theme(theme)

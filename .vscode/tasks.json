@@ -5,7 +5,7 @@
             "label": "Run Application",
             "type": "shell",
             "command": "uv",
-            "args": ["run", "--python", "3.12", "python", "-m", "src.main"],
+            "args": ["run", "--python", "3.12", "python", "dev.py"],
             "options": {
                 "env": {
                     "PYTHONPATH": "${workspaceFolder}"

@@ -9,9 +9,10 @@ class TrayIcon(QSystemTrayIcon):
     toggle_window = pyqtSignal()
     toggle_bluetooth = pyqtSignal(bool)
     refresh_clicked = pyqtSignal()
+    theme_toggled = pyqtSignal(bool)
     exit_clicked = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, dark_mode: bool = False, parent=None):
         super().__init__(parent)
         self._bt_on = False
         self._bt_action = None
@@ -47,11 +48,22 @@ class TrayIcon(QSystemTrayIcon):
 
         self._menu.addSeparator()
 
+        self._theme_action = QAction("深色模式", self)
+        self._theme_action.setCheckable(True)
+        self._theme_action.setChecked(dark_mode)
+        self._theme_action.triggered.connect(self._on_theme_toggled)
+        self._menu.addAction(self._theme_action)
+
+        self._menu.addSeparator()
+
         exit_action = QAction("退出", self)
         exit_action.triggered.connect(self.exit_clicked.emit)
         self._menu.addAction(exit_action)
 
         self.setContextMenu(self._menu)
+
+    def _on_theme_toggled(self, checked: bool):
+        self.theme_toggled.emit(checked)
 
     def _on_activated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:

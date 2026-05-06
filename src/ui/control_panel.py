@@ -101,7 +101,8 @@ class ControlPanel(QWidget):
         self._switch.toggled.connect(self.bluetooth_toggled.emit)
 
         self._label = QLabel("蓝牙 OFF")
-        self._label.setStyleSheet("color:#757575;font-size:13px;")
+        self._label.setObjectName("BtStatusLabel")
+        self._label.setProperty("btOn", False)
 
         layout.addWidget(self._switch)
         layout.addWidget(self._label)
@@ -115,7 +116,13 @@ class ControlPanel(QWidget):
     def set_bluetooth_state(self, on: bool):
         self._switch.setChecked(on)
         self._label.setText("蓝牙 ON" if on else "蓝牙 OFF")
-        self._label.setStyleSheet(f"color:{'#4CAF50' if on else '#757575'};font-size:13px;")
+        self._label.setProperty("btOn", on)
+        self._label.style().unpolish(self._label)
+        self._label.style().polish(self._label)
+
+    def refresh_label_style(self):
+        self._label.style().unpolish(self._label)
+        self._label.style().polish(self._label)
 
     def set_refreshing(self, refreshing: bool):
         if refreshing:
