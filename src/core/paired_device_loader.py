@@ -56,6 +56,28 @@ class PairedDeviceLoader(QObject):
         return devices
 
 
+async def unpair_device_by_address(address: str) -> bool:
+    """通过蓝牙地址解除系统级设备配对。"""
+    all_devices = await DeviceInformation.find_all_async()
+    for i in range(all_devices.size):
+        info = all_devices.get_at(i)
+        if "Bluetooth" not in info.id:
+            continue
+        try:
+            bt = await BluetoothDevice.from_id_async(info.id)
+            if bt is not None:
+                formatted = _format_address(bt.bluetooth_address)
+                if formatted == address:
+                    result = await info.pairing.unpair_async()
+                    logger.info("System unpaired: %s (%s)", info.name or "Unknown", address)
+                    return True
+        except Exception as e:
+            logger.debug("Unpair check failed for %s: %s", info.name if 'info' in dir() else "?", e)
+            continue
+    logger.warning("Device not found for system unpair: %s", address)
+    return False
+
+
 def _format_address(raw) -> str:
     try:
         addr = int(raw)

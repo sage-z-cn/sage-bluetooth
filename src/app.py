@@ -95,7 +95,7 @@ class App:
         self._bt_mgr.read_device_info(address)
 
     def _on_delete_device(self, address: str):
-        device = self._bt_mgr._scanner._discovered.get(address)
+        device = self._bt_mgr.get_discovered_device(address)
         name = device.display_name if device else address
         reply = QMessageBox.question(
             self._window,
@@ -105,13 +105,14 @@ class App:
             QMessageBox.StandardButton.No,
         )
         if reply == QMessageBox.StandardButton.Yes:
+            self._bt_mgr.unpair_device(address)
             self._window.get_device_list().remove_device(address)
 
     def _on_connection_state_changed(self, address: str, state_name: str):
         state = ConnectionState[state_name]
         self._window.get_device_list().update_connection_state(address, state)
         if state == ConnectionState.CONNECTED:
-            device = self._bt_mgr._scanner._discovered.get(address)
+            device = self._bt_mgr.get_discovered_device(address)
             self._tray.set_connected(device.display_name if device else address)
             self._bt_mgr.read_device_info(address)
         elif state == ConnectionState.DISCONNECTED:
@@ -121,7 +122,7 @@ class App:
         self._tray.showMessage("Sage Bluetooth", msg, QSystemTrayIcon.MessageIcon.Warning, 3000)
 
     def _on_battery_critical(self, address: str, level: int):
-        device = self._bt_mgr._scanner._discovered.get(address)
+        device = self._bt_mgr.get_discovered_device(address)
         name = device.display_name if device else address
         self._tray.showMessage(
             "电量不足",

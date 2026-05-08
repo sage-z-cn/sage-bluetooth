@@ -7,7 +7,7 @@ from src.core.adapter_controller import AdapterController
 from src.core.device_connector import DeviceConnector
 from src.core.device_scanner import DeviceScanner
 from src.core.gatt_reader import GattReader
-from src.core.paired_device_loader import PairedDeviceLoader
+from src.core.paired_device_loader import PairedDeviceLoader, unpair_device_by_address
 from src.models.device import BLEDeviceModel, ConnectionState, ScanState
 from src.models.device_info import DeviceInfoModel
 from src.services.connection_monitor import ConnectionMonitor
@@ -126,18 +126,44 @@ class BluetoothManager(QObject):
         self._battery_monitor.stop()
         self._run_async(self._connector.disconnect(address))
 
-    def pair_device(self) -> None:
-        self._run_async(self._connector.pair())
+    def pair_device(self, address: str) -> None:
+        async def _connect_and_pair():
+            if not self._connector.is_connected or self._connector.connected_address != address:
+                ok = await self._connector.connect(address)
+                if not ok:
+                    return
+            await self._connector.pair()
+
+        self._run_async(_connect_and_pair())
 
     def read_device_info(self, address: str) -> None:
         async def _read():
-            client = self._connector._client
+            client = self.get_connected_client()
             if client and client.is_connected and client.address == address:
                 await self._gatt.read_device_info(client)
         self._run_async(_read())
 
     def get_connected_address(self) -> str | None:
         return self._connector.connected_address
+
+    def get_discovered_device(self, address: str):
+        return self._scanner._discovered.get(address)
+
+    def get_device_display_name(self, address: str) -> str:
+        device = self._scanner._discovered.get(address)
+        return device.display_name if device else address
+
+    def get_connected_client(self):
+        return self._connector._client
+
+    def mark_device_paired(self, address: str) -> None:
+        discovered = self._scanner._discovered
+        if address in discovered:
+            discovered[address] = discovered[address].with_updates(is_paired=True)
+            self.device_updated.emit(discovered[address])
+
+    def unpair_device(self, address: str) -> None:
+        self._run_async(unpair_device_by_address(address))
 
     async def shutdown(self) -> None:
         self._conn_monitor.stop_monitoring()
@@ -155,7 +181,7 @@ class BluetoothManager(QObject):
         self._run_async(self._auto_read_info(address))
 
     async def _start_battery_monitor(self, address: str) -> None:
-        client = self._connector._client
+        client = self.get_connected_client()
         if client and client.is_connected:
             self._battery_monitor.start(address, client)
 
@@ -179,9 +205,6 @@ class BluetoothManager(QObject):
     def _on_pairing_result(self, address: str, success: bool) -> None:
         if success:
             logger.info("Pairing succeeded: %s", address)
-            discovered = self._scanner._discovered
-            if address in discovered:
-                discovered[address] = discovered[address].with_updates(is_paired=True)
-                self.device_updated.emit(discovered[address])
+            self.mark_device_paired(address)
         else:
             self.error_occurred.emit("配对失败")
