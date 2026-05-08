@@ -60,7 +60,7 @@ class BLEDeviceModel:
             service_uuids = []
         return cls(
             address=device.address,
-            name=device.name or advertisement_data.local_name or "Unknown",
+            name=advertisement_data.local_name or device.name or "Unknown",
             rssi=advertisement_data.rssi or -100,
             appearance=getattr(advertisement_data, "appearance", 0) or 0,
             manufacturer_data=dict(manufacturer_data),

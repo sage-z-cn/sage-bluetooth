@@ -75,7 +75,7 @@ class BluetoothManager(QObject):
         self._connector.connection_failed.connect(self._on_connection_failed)
         self._connector.pairing_result.connect(self._on_pairing_result)
 
-        self._gatt.device_info_ready.connect(self.device_info_ready.emit)
+        self._gatt.device_info_ready.connect(self._on_device_info_ready)
         self._gatt.battery_level_updated.connect(self.battery_level_updated.emit)
         self._gatt.error_occurred.connect(self.error_occurred.emit)
 
@@ -187,6 +187,18 @@ class BluetoothManager(QObject):
 
     async def _auto_read_info(self, address: str) -> None:
         await self.read_device_info(address)
+
+    def _on_device_info_ready(self, info: DeviceInfoModel) -> None:
+        if info.name and info.name != "Unknown":
+            address = info.address
+            discovered = self._scanner._discovered
+            if address in discovered:
+                old = discovered[address]
+                if old.name == "Unknown" or old.name != info.name:
+                    updated = old.with_updates(name=info.name)
+                    discovered[address] = updated
+                    self.device_updated.emit(updated)
+        self.device_info_ready.emit(info)
 
     def _on_disconnected(self, address: str) -> None:
         logger.info("Device disconnected: %s", address)
